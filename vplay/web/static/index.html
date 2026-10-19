@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚡ vplay Control Center & Live Code Inspector</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #0b0d17 0%, #151828 50%, #080911 100%);
+            --card-bg: rgba(22, 27, 44, 0.75);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --accent-cyan: #00f2fe;
+            --accent-blue: #4facfe;
+            --accent-purple: #9d50bb;
+            --accent-emerald: #10b981;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container { width: 100%; max-width: 780px; }
+        header { text-align: center; margin-bottom: 24px; }
+
+        .logo-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(90deg, #00f2fe, #4facfe);
+            color: #0b0d17;
+            font-weight: 700;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            padding: 5px 14px;
+            border-radius: 20px;
+            margin-bottom: 8px;
+        }
+
+        h1 {
+            font-size: 1.85rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, #ffffff, var(--accent-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p.subtitle { color: var(--text-muted); font-size: 0.9rem; margin-top: 4px; }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            backdrop-filter: blur(16px);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+        }
+
+        .card-title {
+            font-size: 1.05rem;
+            font-weight: 600;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        .select-box {
+            width: 100%;
+            background: #0d101d;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            color: #38bdf8;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.95rem;
+            padding: 12px;
+            margin-bottom: 12px;
+        }
+
+        .preset-desc-box {
+            background: rgba(0, 0, 0, 0.3);
+            border-left: 3px solid var(--accent-cyan);
+            padding: 10px 14px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            border-radius: 4px;
+            margin-bottom: 12px;
+        }
+
+        .code-box-header {
+            font-size: 0.8rem;
+            color: var(--accent-cyan);
+            font-weight: 600;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, rgba(79, 172, 254, 0.15) 0%, rgba(0, 242, 254, 0.15) 100%);
+            border: 1px solid rgba(0, 242, 254, 0.3);
+            color: var(--text-main);
+            padding: 14px 16px;
+            border-radius: 12px;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            text-align: center;
+        }
+
+        .btn:hover {
+            background: linear-gradient(135deg, rgba(79, 172, 254, 0.3) 0%, rgba(0, 242, 254, 0.3) 100%);
+            border-color: var(--accent-cyan);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 242, 254, 0.25);
+        }
+
+        .btn-purple {
+            background: linear-gradient(135deg, rgba(157, 80, 187, 0.2) 0%, rgba(110, 72, 170, 0.2) 100%);
+            border-color: rgba(157, 80, 187, 0.4);
+        }
+
+        .btn-purple:hover {
+            background: linear-gradient(135deg, rgba(157, 80, 187, 0.4) 0%, rgba(110, 72, 170, 0.4) 100%);
+            border-color: var(--accent-purple);
+            box-shadow: 0 6px 20px rgba(157, 80, 187, 0.3);
+        }
+
+        .btn-full { grid-column: span 2; width: 100%; margin-top: 10px; }
+        .btn-icon { font-size: 1.3rem; }
+
+        .terminal-box {
+            background: #05060a;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 14px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.82rem;
+            color: #38bdf8;
+            height: 270px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .log-entry { margin-bottom: 4px; line-height: 1.4; }
+        .log-time { color: var(--text-muted); }
+        .log-success { color: #34d399; }
+        .log-info { color: #60a5fa; }
+        .log-err { color: #f87171; }
+
+        .code-input-box {
+            width: 100%;
+            background: #060810;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            color: #38bdf8;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.82rem;
+            padding: 12px;
+            line-height: 1.4;
+            resize: vertical;
+        }
+
+        .status-dot {
+            width: 8px; height: 8px; border-radius: 50%; background: #10b981;
+            display: inline-block; box-shadow: 0 0 10px #10b981;
+        }
+        .status-dot.offline {
+            background: #f87171; box-shadow: 0 0 10px #f87171;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo-badge">
+                <span class="status-dot" id="statusDot"></span>
+                <span id="statusBadgeText">ESP32 LINK AUTO-DETECT</span>
+            </div>
+            <h1>vplay Hardware Control & Live Code Inspector</h1>
+            <p class="subtitle" id="hostSubtitle">Cross-Platform RF Reverse-Engineering Engine (Windows · Linux · macOS · Android/Termux)</p>
+        </header>
+
+        <div class="card">
+            <div class="card-title">
+                <span>🎛️ Fine Granular Hardware Presets</span>
+            </div>
+            <select id="presetSelect" class="select-box" onchange="updatePresetView()"></select>
+
+            <div class="preset-desc-box" id="presetDesc"></div>
+
+            <div class="code-box-header">
+                <span>🐍 Executable MicroPython Device Code</span>
+                <span style="color: #94a3b8; font-weight: 400; text-transform: none;">Sent live over Raw REPL</span>
+            </div>
+            <textarea id="presetScriptCode" class="code-input-box" rows="6" readonly></textarea>
+
+            <button class="btn btn-full" onclick="executeSelectedPreset()">
+                <span class="btn-icon">⚡</span>
+                <span>Execute Preset on ESP32</span>
+            </button>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span>🐍 Live Custom MicroPython Code Injector</span></div>
+            <textarea id="pythonCode" class="code-input-box" rows="4" placeholder="Type any custom MicroPython script (e.g. import machine; print(machine.freq()))"></textarea>
+            <button class="btn btn-purple btn-full" onclick="injectCustomCode()">
+                <span class="btn-icon">▶️</span>
+                <span>Execute Custom Code on ESP32</span>
+            </button>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span>💻 Live Hardware Console Stream</span></div>
+            <div class="terminal-box" id="terminal">vplay Control Center Ready. Probing host link...\n</div>
+        </div>
+    </div>
+
+    <script>
+        const presetData = /*__PRESET_DATA__*/{};
+
+        function populatePresetDropdown() {
+            const select = document.getElementById('presetSelect');
+            select.innerHTML = '';
+            for (const [key, item] of Object.entries(presetData)) {
+                const opt = document.createElement('option');
+                opt.value = key;
+                opt.textContent = item.title;
+                select.appendChild(opt);
+            }
+            updatePresetView();
+        }
+
+        function updatePresetView() {
+            const val = document.getElementById('presetSelect').value;
+            const item = presetData[val];
+            if (item) {
+                document.getElementById('presetDesc').innerText = item.desc;
+                document.getElementById('presetScriptCode').value = item.script;
+                document.getElementById('pythonCode').value = item.script;
+            }
+        }
+
+        function logToTerm(text, type = 'info') {
+            const term = document.getElementById('terminal');
+            const time = new Date().toLocaleTimeString();
+            const colorClass = type === 'success' ? 'log-success' : type === 'err' ? 'log-err' : 'log-info';
+            term.innerHTML += `<div class="log-entry"><span class="log-time">[${time}]</span> <span class="${colorClass}">${escapeHtml(text)}</span></div>`;
+            term.scrollTop = term.scrollHeight;
+        }
+
+        function escapeHtml(str) {
+            return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+
+        async function refreshDiagnostics() {
+            try {
+                const res = await fetch('/api/diagnostics');
+                const diag = await res.json();
+                const dot = document.getElementById('statusDot');
+                const badge = document.getElementById('statusBadgeText');
+                const sub = document.getElementById('hostSubtitle');
+                if (diag.usb_detected) {
+                    dot.classList.remove('offline');
+                    badge.textContent = `${diag.host_os.toUpperCase()} (${diag.backend.toUpperCase()}) · CONNECTED`;
+                } else {
+                    dot.classList.add('offline');
+                    badge.textContent = `${diag.host_os.toUpperCase()} (${diag.backend.toUpperCase()}) · DISCONNECTED`;
+                }
+                sub.textContent = `Active Device: ${diag.usb_device}`;
+            } catch (e) {}
+        }
+
+        async function executeSelectedPreset() {
+            const presetKey = document.getElementById('presetSelect').value;
+            logToTerm(`Executing Preset Facility: [${presetKey}]...`, 'info');
+            try {
+                const response = await fetch(`/api/command?type=${encodeURIComponent(presetKey)}`);
+                const data = await response.json();
+                if (data.success) {
+                    logToTerm(`Execution Result (${data.duration ?? '?'}s):\n${data.output}`, 'success');
+                } else {
+                    logToTerm(`Error: ${data.error}`, 'err');
+                }
+            } catch (err) {
+                logToTerm(`Network Exception: ${err.message}`, 'err');
+            }
+            refreshDiagnostics();
+        }
+
+        async function injectCustomCode() {
+            const code = document.getElementById('pythonCode').value;
+            if (!code.trim()) return;
+            logToTerm(`Injecting MicroPython Code...`, 'info');
+            try {
+                const response = await fetch('/api/custom_eval', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({code: code})
+                });
+                const data = await response.json();
+                if (data.success) {
+                    logToTerm(`Output (${data.duration ?? '?'}s):\n${data.output}`, 'success');
+                } else {
+                    logToTerm(`Error: ${data.error}`, 'err');
+                }
+            } catch (err) {
+                logToTerm(`Exception: ${err.message}`, 'err');
+            }
+            refreshDiagnostics();
+        }
+
+        window.onload = function() {
+            populatePresetDropdown();
+            refreshDiagnostics();
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "vplay"
+version = "0.2.0"
+description = "2.4GHz retro gamepad RF sniffer & emulation toolkit (ESP32 + nRF24L01+/Si24R1), cross-platform host for Windows, Linux, macOS and Android/Termux"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.11"
+dependencies = [
+    "pyserial>=3.5",
+    "esptool>=4.7",
+    # PyUSB is only needed for the Android/Termux raw-USB backend.
+    "pyusb>=1.2; sys_platform == 'android' or sys_platform == 'linux'",
+]
+
+[project.optional-dependencies]
+usb = ["pyusb>=1.2"]
+dev = ["pytest>=7"]
+
+[project.scripts]
+vplay = "vplay.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["vplay*"]
+
+[tool.setuptools.package-data]
+"vplay.payloads" = ["*.py"]
+"vplay.web" = ["static/*"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]

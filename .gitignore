@@ -3,6 +3,18 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Virtual environments & packaging artifacts
+.venv/
+venv/
+build/
+dist/
+*.egg-info/
+.pytest_cache/
+
+# Local configuration overrides
+vplay.toml
+.vplay_web.pid
+
 # Logs
 *.log
 flasher_debug.log

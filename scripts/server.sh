@@ -1,35 +1,48 @@
-#!/data/data/com.termux/files/usr/bin/bash
-# ⚡ ESP32 Web Dashboard Server Control Manager
+#!/usr/bin/env bash
+# ⚡ vplay Web Dashboard Server Control Manager (Android/Termux, Linux, macOS)
 # Usage: ./scripts/server.sh [start|stop|restart|status]
 
-CMD=${1:-status}
-SCRIPT_PATH="/data/data/com.termux/files/home/trials/vplay/scripts/web_server.py"
+set -u
+CMD="${1:-status}"
+REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+SCRIPT_PATH="$REPO_ROOT/scripts/web_server.py"
+PYTHON_BIN="${PYTHON_BIN:-python3}"
 
-get_dev() {
+is_termux() {
+    command -v termux-usb >/dev/null 2>&1
+}
+
+get_termux_dev() {
     termux-usb -l | jq -r '.[0]' 2>/dev/null
 }
 
 start_server() {
-    pkill -f "$SCRIPT_PATH" 2>/dev/null
-    DEV=$(get_dev)
-    if [ -z "$DEV" ] || [ "$DEV" == "null" ]; then
-        echo "❌ No USB OTG device detected."
-        echo "   Please connect ESP32 via USB OTG cable and try again."
-        return 1
+    pkill -f "$SCRIPT_PATH" 2>/dev/null || true
+    if is_termux; then
+        DEV="$(get_termux_dev)"
+        if [ -z "$DEV" ] || [ "$DEV" = "null" ]; then
+            echo "❌ No USB OTG device detected."
+            echo "   Please connect ESP32 via USB OTG cable and try again."
+            return 1
+        fi
+        echo "🚀 Starting vplay Web Control Dashboard on $DEV (Termux USB OTG)..."
+        termux-usb -E -e "$SCRIPT_PATH" "$DEV" &
+    else
+        echo "🚀 Starting vplay Web Control Dashboard..."
+        "$PYTHON_BIN" "$SCRIPT_PATH" &
     fi
-    echo "🚀 Starting ESP32 Web Control Dashboard on $DEV..."
-    termux-usb -E -e "$SCRIPT_PATH" "$DEV" &
     sleep 2
-    if pgrep -f "$SCRIPT_PATH" > /dev/null; then
+    if pgrep -f "$SCRIPT_PATH" >/dev/null 2>&1; then
         echo "✅ Web Server is LIVE at http://localhost:8080"
     else
-        echo "⚠️ Failed to start server. Please check USB permission prompt."
+        echo "⚠️ Failed to start server. Check output or USB permissions."
+        return 1
     fi
 }
 
 stop_server() {
-    echo "🛑 Stopping ESP32 Web Control Dashboard..."
-    pkill -f "$SCRIPT_PATH" 2>/dev/null
+    echo "🛑 Stopping vplay Web Control Dashboard..."
+    pkill -f "$SCRIPT_PATH" 2>/dev/null || true
     sleep 1
     echo "✅ Server stopped."
 }
@@ -40,8 +53,8 @@ restart_server() {
 }
 
 status_server() {
-    if pgrep -f "$SCRIPT_PATH" > /dev/null; then
-        PID=$(pgrep -f "$SCRIPT_PATH" | head -n 1)
+    if pgrep -f "$SCRIPT_PATH" >/dev/null 2>&1; then
+        PID="$(pgrep -f "$SCRIPT_PATH" | head -n 1)"
         echo "🟢 Web Server is RUNNING (PID: $PID)"
         echo "   URL: http://localhost:8080"
     else

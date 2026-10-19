@@ -1,0 +1,28 @@
+# vplay configuration file (copy to vplay.toml to customize)
+# Precedence: defaults < vplay.toml < VPLAY_<SECTION>_<KEY> env vars < CLI flags
+
+[device]
+# "auto" picks "usb" on Android/Termux and "serial" on Windows/Linux/macOS.
+backend = "auto"
+# Explicit serial port (e.g. "COM5" on Windows or "/dev/ttyUSB0" on Linux).
+# Leave empty to auto-detect the CP2102 by USB VID:PID (10c4:ea60).
+port = ""
+baudrate = 115200
+vid = 0x10C4
+pid = 0xEA60
+
+[pins]
+# ESP32 -> nRF24L01+ / Si24R1 HSPI pin mapping
+sck = 14
+mosi = 13
+miso = 12
+csn = 15
+ce = 16
+spi_id = 1
+spi_baudrate = 4000000
+led = 2
+
+[web]
+# Loopback by default so untrusted hosts on LAN cannot run code on your ESP32.
+host = "127.0.0.1"
+port = 8080
